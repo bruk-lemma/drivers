@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: genesis_app
+    working_dir: /usr/src/app
+    environment:
+      JWT_SECRET: secret
+      JWT_EXPIRATION: 1h
+      JWT_TOKEN_AUDIENCE: localhost:3000
+      JWT_TOKEN_ISSUER: localhost:3000
+      JWT_ACCESS_TOKEN_TTL: 3600s
+      JWT_REFRESH_TOKEN_TTL: 86400s
+      DB_HOST: db
+      DB_TYPE: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: genesis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      LOGGER_LEVEL: debug
+      DEBUG: "false"
+      USE_JSON_LOGGER: "false"
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: ["npm", "run", "start:dev"]
+    depends_on:
+      - db
+      - redis
+    networks:
+      - nest-network
+
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: genesis
+    ports:
+      - "5433:5432"
+    volumes:
+      - /root/auth_data:/var/lib/postgresql/data
+    networks:
+      - nest-network
+
+  redis:
+    image: redis:latest
+    container_name: redis_cache
+    ports:
+      - "6378:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nest-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5051:80"
+    depends_on:
+      - db
+    networks:
+      - nest-network
+
+volumes:
+  db_data:
+  redis_data:
+
+networks:
+  nest-network:
+    external: true
