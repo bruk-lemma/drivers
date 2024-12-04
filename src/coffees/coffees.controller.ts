@@ -30,9 +30,8 @@ export class CoffeesController {
   }
 
   @ApiExcludeEndpoint()
-
-  // @Roles(Role.Regular)
-  @Permissions(Permission.CreateCoffee)
+  @Roles(Role.Regular)
+  //@Permissions(Permission.CreateCoffee)
   @Get()
   findAll(@ActiveUser() user: ActiveUserData) {
     console.log(user);

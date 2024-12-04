@@ -21,8 +21,11 @@ import { diskStorage } from 'multer';
 import { SchoolResponseDto } from './dto/school-response.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { ApiResponseDto } from './dto/api-response.dto';
+import { Roles } from 'src/iam/authorization/decorators/roles.decorators';
 
-@Auth(AuthType.None)
+import { Role } from 'src/users/enums/role.enum';
+
+// @Auth(AuthType.None)
 @Controller('school')
 export class SchoolController {
   constructor(private readonly schoolService: SchoolService) {}
@@ -127,5 +130,14 @@ export class SchoolController {
       message: 'File uploaded and saved successfully',
       file: savedFile,
     };
+  }
+
+  // @Roles(Role.Admin)
+  @Get('approve-school/:schoolId')
+  async approveSchool(
+    @Param('schoolId') schoolId: number,
+  ): Promise<ApiResponseDto<SchoolResponseDto>> {
+    const school = await this.schoolService.approveSchool(schoolId);
+    return new ApiResponseDto(school, 'School approved successfully');
   }
 }

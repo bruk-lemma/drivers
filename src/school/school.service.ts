@@ -165,4 +165,20 @@ export class SchoolService {
     schoolResponseDto.createdBy = entity.createdBy;
     return schoolResponseDto;
   }
+
+  async approveSchool(id: number): Promise<SchoolResponseDto> {
+    try {
+      const school = await this.schoolRepository.findOne({
+        where: { id },
+      });
+      if (!school) {
+        throw new NotFoundException('School not found');
+      }
+      school.isVerified = true;
+      await this.schoolRepository.save(school);
+      return this.mapEntityToDto(school);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

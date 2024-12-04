@@ -51,6 +51,9 @@ export class School {
   @Column({ default: false })
   isDeleted: boolean;
 
+  @Column({ default: false })
+  isVerified: boolean;
+
   @OneToMany(() => SchoolFiles, (schoolFiles) => schoolFiles.school)
   files: SchoolFiles[];
 }
