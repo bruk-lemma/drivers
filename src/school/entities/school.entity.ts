@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -33,6 +34,7 @@ export class School {
   students: Student[];
 
   @OneToOne(() => Users, (user) => user.school)
+  @JoinColumn()
   createdBy: Users;
 
   // @Exclude()

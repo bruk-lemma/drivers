@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,13 +24,15 @@ import { randomUUID } from 'crypto';
 import { plainToInstance } from 'class-transformer';
 import { SignInResponseDto } from './dto/sign-in-response.dto/sign-in-response.dto';
 import { SignUpResponseDto } from './dto/sign-up-response.dto/sign-up-response.dto';
-import { map } from 'rxjs';
-import { ApiResponseDto } from 'src/school/dto/api-response.dto';
+import { Role } from 'src/users/entities/role.entity';
+// import { Role } from 'src/users/enums/role.enum';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
+    @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+
     private readonly hashingService: HashingService,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
@@ -39,9 +42,18 @@ export class AuthenticationService {
 
   async signUp(signUpDto: SignUpDto): Promise<SignUpResponseDto> {
     try {
+      const role = await this.roleRepository.findOneOrFail({
+        where: { id: signUpDto.roleId },
+      });
+
+      if (!role) {
+        throw new NotFoundException('Role not found');
+      }
+
       const user = new Users();
       user.email = signUpDto.email;
       user.password = await this.hashingService.hash(signUpDto.password);
+      user.role = role;
       await this.userRepository.save(user);
       return this.mapEntityToDto(user);
     } catch (error) {
@@ -163,11 +175,38 @@ export class AuthenticationService {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
+        relations: ['role'],
       });
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new NotFoundException('User not found');
       }
       return this.mapEntityToDto(user);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async changeUserRole(id: number, role: string): Promise<SignUpResponseDto> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      user.role = Role[role];
+
+      await this.userRepository.save(user);
+      return this.mapEntityToDto(user);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findRoles(): Promise<Role[]> {
+    try {
+      const roles = await this.roleRepository.find();
+      return roles;
     } catch (error) {
       throw error;
     }
@@ -177,6 +216,7 @@ export class AuthenticationService {
     const signUpResponseDto = new SignUpResponseDto();
     signUpResponseDto.email = user.email;
     signUpResponseDto.id = user.id;
+    signUpResponseDto.role = user.role;
     return signUpResponseDto;
   }
 }

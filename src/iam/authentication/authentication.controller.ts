@@ -19,6 +19,7 @@ import { ApiExcludeEndpoint, ApiResponse } from '@nestjs/swagger';
 import { SignInResponseDto } from './dto/sign-in-response.dto/sign-in-response.dto';
 import { ApiResponseDto } from 'src/school/dto/api-response.dto';
 import { SignUpResponseDto } from './dto/sign-up-response.dto/sign-up-response.dto';
+import { Role } from 'src/users/entities/role.entity';
 
 @Auth(AuthType.None)
 @Controller('authentication')
@@ -79,11 +80,27 @@ export class AuthenticationController {
 
     return { hasPermission };
   }
+
   @Get('user/:id')
   async getUser(
     @Param('id') id: number,
   ): Promise<ApiResponseDto<SignUpResponseDto>> {
     const user = await this.authenticationService.getUser(id);
     return new ApiResponseDto(user, 'User fetched successfully');
+  }
+
+  @Post('user/:id/change-role')
+  async changeUserRole(
+    @Param('id') id: number,
+    @Body('role') role: string,
+  ): Promise<ApiResponseDto<SignUpResponseDto>> {
+    const user = await this.authenticationService.changeUserRole(id, role);
+    return new ApiResponseDto(user, 'User role updated successfully');
+  }
+
+  @Get('roles')
+  async findRoles(): Promise<ApiResponseDto<Role[]>> {
+    const roles = await this.authenticationService.findRoles();
+    return new ApiResponseDto(roles, 'Roles fetched successfully');
   }
 }

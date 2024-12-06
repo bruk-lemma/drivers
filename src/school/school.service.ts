@@ -138,6 +138,7 @@ export class SchoolService {
       if (!school) {
         throw new NotFoundException('School not found');
       }
+
       const newFile = this.schoolFilesRepository.create({
         school: school,
         fileName: `licence-${school.name.replace(' ', '') + '-' + fileData.fileName}`,

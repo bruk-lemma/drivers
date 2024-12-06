@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Student } from './student.entity';
+import { Expose } from 'class-transformer';
 
 export enum StudentDocumentType {
   GRADE_EIGHT = 'grade-eight',
@@ -19,15 +20,19 @@ export class StudentFiles {
   student: Student;
 
   @Column()
+  @Expose()
   fileName: string;
 
   @Column()
+  @Expose()
   filePath: string;
 
   @Column()
+  @Expose()
   fileType: string;
 
   @Column()
+  @Expose()
   fileSize: string;
 
   @Column({
@@ -35,6 +40,7 @@ export class StudentFiles {
     enum: StudentDocumentType,
     nullable: false,
   })
+  @Expose()
   fileCategory: StudentDocumentType;
 
   @Column()

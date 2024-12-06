@@ -4,14 +4,16 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from '../enums/role.enum';
+// import { Role } from '../enums/role.enum';
 import { PermissionType } from './permissions.type';
 import { Application } from 'src/application/entities/application.entity';
 import { School } from 'src/school/entities/school.entity';
 import { Expose } from 'class-transformer';
+import { Role } from './role.entity';
 // import {
 //   Permission,
 //   PermissionType,
@@ -29,7 +31,10 @@ export class Users {
   @Column()
   password: string;
 
-  @Column({ enum: Role, default: Role.Regular })
+  // @Column({ enum: Role, default: Role.Regular })
+  // role: Role;
+
+  @ManyToOne(() => Role, (role) => role.users)
   role: Role;
 
   @Column({ type: 'json', default: [] })
@@ -40,7 +45,7 @@ export class Users {
   applications: Application[];
 
   @OneToOne(() => School, (school) => school.createdBy, { cascade: true })
-  @JoinColumn() // This marks this side of the relation as the owning side.
+  // This marks this side of the relation as the owning side.
   school: School;
 
   // @Column({ enum: Permission, default: [], type: 'json' })
