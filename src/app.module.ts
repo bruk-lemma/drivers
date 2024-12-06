@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { CoffeesModule } from './coffees/coffees.module';
 import { UsersModule } from './users/users.module';
 import { IamModule } from './iam/iam.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SchoolModule } from './school/school.module';
 import { StudentModule } from './student/student.module';
@@ -13,6 +13,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ApplicationModule } from './application/application.module';
 import { ExaminationModule } from './examination/examination.module';
+import { ensureDatabaseExists } from './create-db';
 
 @Module({
   imports: [
@@ -20,15 +21,25 @@ import { ExaminationModule } from './examination/examination.module';
     CoffeesModule,
     UsersModule,
     IamModule,
-    TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any,
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT as any,
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      // inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const connectionOptions = {
+          type: process.env.DB_TYPE as any,
+          host: process.env.DB_HOST,
+          port: process.env.DB_PORT as any,
+          username: process.env.DB_USER,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_NAME,
+          autoLoadEntities: true,
+          synchronize: true, //
+        };
+
+        // Ensure database exists before connecting//
+        await ensureDatabaseExists(connectionOptions);
+
+        return connectionOptions;
+      },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
