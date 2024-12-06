@@ -19,7 +19,7 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      DB_NAME: genesis
+      DB_NAME: genesis_pro
       REDIS_HOST: redis
       REDIS_PORT: 6379
       LOGGER_LEVEL: debug
