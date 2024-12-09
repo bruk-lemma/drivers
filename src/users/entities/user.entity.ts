@@ -1,10 +1,10 @@
 import {
   Column,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -14,6 +14,7 @@ import { Application } from 'src/application/entities/application.entity';
 import { School } from 'src/school/entities/school.entity';
 import { Expose } from 'class-transformer';
 import { Role } from './role.entity';
+import { Reset_And_Verification_Token } from './tokens.entity';
 // import {
 //   Permission,
 //   PermissionType,
@@ -48,6 +49,11 @@ export class Users {
   // This marks this side of the relation as the owning side.
   school: School;
 
+  @OneToMany(
+    (type) => Reset_And_Verification_Token,
+    (resetToken) => resetToken.user,
+  )
+  resetTokens: Reset_And_Verification_Token[];
   // @Column({ enum: Permission, default: [], type: 'json' })
   // permissions: PermissionType[];
   // @Column({ type: 'json', default: [] })

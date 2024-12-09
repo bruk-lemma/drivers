@@ -14,11 +14,12 @@ import { AuthenticationGuard } from './authentication/guards/authentication/auth
 import { RefreshTokenIdsStorage } from './authentication/refresh-token-ids.storage/refresh-token-ids.storage';
 import { RolesGuard } from './authorization/gurads/roles/roles.guard';
 import { Role } from 'src/users/entities/role.entity';
+import { Reset_And_Verification_Token } from 'src/users/entities/tokens.entity';
 //import { PermissionsGuard } from './authorization/gurads/permissions/permissions.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users, Role]),
+    TypeOrmModule.forFeature([Users, Role, Reset_And_Verification_Token]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
   ],

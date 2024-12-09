@@ -20,6 +20,8 @@ import { SignInResponseDto } from './dto/sign-in-response.dto/sign-in-response.d
 import { ApiResponseDto } from 'src/school/dto/api-response.dto';
 import { SignUpResponseDto } from './dto/sign-up-response.dto/sign-up-response.dto';
 import { Role } from 'src/users/entities/role.entity';
+import { ResetPasswordDto } from './dto/reset-password.dto/reset-password.dto';
+import { ForgetPasswordDto } from './dto/forget-password.dto/forget-password.sto';
 
 @Auth(AuthType.None)
 @Controller('authentication')
@@ -29,7 +31,7 @@ export class AuthenticationController {
   @ApiResponse({
     status: 201,
     description: 'Sign up',
-    type: SignInResponseDto,
+    type: SignUpResponseDto,
   })
   @Post('sign-up')
   async signUp(
@@ -59,6 +61,24 @@ export class AuthenticationController {
   @Post('refresh-tokens')
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
     return await this.authenticationService.refreshTokens(refreshTokenDto);
+  }
+
+  @ApiResponse({
+    description: 'forget password',
+    status: 200,
+  })
+  @Post('forget-password')
+  async forgetPassword(@Body() forgetPasswordDto: ForgetPasswordDto) {
+    return await this.authenticationService.forgetPassword(forgetPasswordDto);
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'reset password',
+  })
+  @Post('reset-password')
+  async resetPassword(@Body() resetpassworddto: ResetPasswordDto) {
+    return await this.authenticationService.resetPassword(resetpassworddto);
   }
 
   @ApiExcludeEndpoint()

@@ -1,4 +1,5 @@
 import {
+  Body,
   ConflictException,
   Inject,
   Injectable,
@@ -21,10 +22,17 @@ import {
   RefreshTokenIdsStorage,
 } from './refresh-token-ids.storage/refresh-token-ids.storage';
 import { randomUUID } from 'crypto';
+import * as nodemailer from 'nodemailer';
 import { plainToInstance } from 'class-transformer';
 import { SignInResponseDto } from './dto/sign-in-response.dto/sign-in-response.dto';
 import { SignUpResponseDto } from './dto/sign-up-response.dto/sign-up-response.dto';
 import { Role } from 'src/users/entities/role.entity';
+import {
+  Reset_And_Verification_Token,
+  TokenType,
+} from 'src/users/entities/tokens.entity';
+import { ResetPasswordDto } from './dto/reset-password.dto/reset-password.dto';
+import { ForgetPasswordDto } from './dto/forget-password.dto/forget-password.sto';
 // import { Role } from 'src/users/enums/role.enum';
 
 @Injectable()
@@ -32,7 +40,8 @@ export class AuthenticationService {
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
     @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
-
+    @InjectRepository(Reset_And_Verification_Token)
+    private readonly tokenRepository: Repository<Reset_And_Verification_Token>,
     private readonly hashingService: HashingService,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
@@ -40,21 +49,22 @@ export class AuthenticationService {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
   ) {}
 
-  async signUp(signUpDto: SignUpDto): Promise<SignUpResponseDto> {
+  async signUp(signUpDto: SignUpDto) {
     try {
-      const role = await this.roleRepository.findOneOrFail({
+      const role = await this.roleRepository.findOne({
         where: { id: signUpDto.roleId },
       });
 
       if (!role) {
         throw new NotFoundException('Role not found');
       }
-
       const user = new Users();
       user.email = signUpDto.email;
       user.password = await this.hashingService.hash(signUpDto.password);
       user.role = role;
+      console.log('user is ' + user);
       await this.userRepository.save(user);
+      console.log('user is' + user);
       return this.mapEntityToDto(user);
     } catch (error) {
       const pgUniqueViolationCode = '23505';
@@ -62,6 +72,7 @@ export class AuthenticationService {
         throw new ConflictException();
         //throw error;
       }
+      throw error;
     }
   }
 
@@ -218,5 +229,118 @@ export class AuthenticationService {
     signUpResponseDto.id = user.id;
     signUpResponseDto.role = user.role;
     return signUpResponseDto;
+  }
+
+  async forgetPassword(forgetPasswordDto: ForgetPasswordDto) {
+    try {
+      const user = await this.userRepository.findOneBy({
+        email: forgetPasswordDto.email,
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      //send email with reset password link
+      const generateSixDigitToken = (): string => {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+      };
+      const verificationToken = generateSixDigitToken();
+
+      const hashedToken = await this.hashingService.hash(verificationToken);
+      const tokenExpires = new Date(Date.now() + 15 * 60 * 1000); // Token valid for 15 minutes
+
+      const resetToken = new Reset_And_Verification_Token();
+      resetToken.token = hashedToken;
+      resetToken.expiresAt = tokenExpires;
+      resetToken.user = user;
+      resetToken.type = TokenType.RESET;
+      resetToken.isAcitve = true;
+
+      await this.tokenRepository.save(resetToken);
+      try {
+        await this.sendEmail(
+          user.email,
+          'Reset password',
+          `Your reset password token is ${verificationToken}`,
+        );
+      } catch (error) {
+        throw new Error(`Email not sent, ${error.message}`);
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: resetPasswordDto.email },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const hashedToken = await this.hashingService.hash(
+        resetPasswordDto.token,
+      );
+      const resetToken = await this.tokenRepository.findOneBy({
+        //token: hashedToken,
+        type: TokenType.RESET,
+        isAcitve: true,
+        isUsed: false,
+        user: { id: user.id },
+      });
+
+      if (!resetToken) {
+        throw new NotFoundException('Token not found');
+      }
+
+      const tokenIsValid = await this.hashingService.compare(
+        resetPasswordDto.token,
+        resetToken.token,
+      );
+
+      if (!tokenIsValid) {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      if (resetToken.expiresAt < new Date()) {
+        throw new UnauthorizedException('Token expired');
+      }
+
+      // const user = resetToken.user;
+      user.password = await this.hashingService.hash(
+        resetPasswordDto.newPassword,
+      );
+      await this.userRepository.save(user);
+      resetToken.isUsed = true;
+      resetToken.isAcitve = false;
+      await this.tokenRepository.save(resetToken);
+      return 'Password reset successfully';
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async sendEmail(to: string, subject: string, body: string): Promise<void> {
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'bruklemma2017@gmail.com',
+          pass: 'qaalvvwroltbgozy',
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"Genesis App" <no-reply@example.com>', // Sender address
+        to, // Recipient email
+        subject, // Email subject
+        text: body, // Plain text body
+        html: `<p>${body}</p>`, // HTML body
+      });
+      console.log(`Email sent to ${to}`);
+    } catch (error) {
+      throw error;
+    }
   }
 }
