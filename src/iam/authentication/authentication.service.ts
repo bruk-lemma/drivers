@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -231,7 +233,7 @@ export class AuthenticationService {
     return signUpResponseDto;
   }
 
-  async forgetPassword(forgetPasswordDto: ForgetPasswordDto) {
+  async forgetPassword(forgetPasswordDto: ForgetPasswordDto): Promise<any> {
     try {
       const user = await this.userRepository.findOneBy({
         email: forgetPasswordDto.email,
@@ -249,6 +251,15 @@ export class AuthenticationService {
       const hashedToken = await this.hashingService.hash(verificationToken);
       const tokenExpires = new Date(Date.now() + 15 * 60 * 1000); // Token valid for 15 minutes
 
+      //invalidate all previous reset tokens
+      const resetTokens = await this.tokenRepository.find({
+        where: { user: { id: user.id }, type: TokenType.RESET, isAcitve: true },
+      });
+      resetTokens.forEach((token) => {
+        token.isAcitve = false;
+        token.isUsed = true;
+      });
+      await this.tokenRepository.save(resetTokens);
       const resetToken = new Reset_And_Verification_Token();
       resetToken.token = hashedToken;
       resetToken.expiresAt = tokenExpires;
@@ -264,8 +275,9 @@ export class AuthenticationService {
           `Your reset password token is ${verificationToken}`,
         );
       } catch (error) {
-        throw new Error(`Email not sent, ${error.message}`);
+        throw new BadRequestException(`Email not sent`);
       }
+      return 'Reset password token sent to your email';
     } catch (error) {
       throw error;
     }
@@ -340,6 +352,9 @@ export class AuthenticationService {
       });
       console.log(`Email sent to ${to}`);
     } catch (error) {
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
+      }
       throw error;
     }
   }
