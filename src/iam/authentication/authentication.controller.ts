@@ -15,13 +15,15 @@ import { SignUpDto } from './dto/sign-up.dto/sign-up.dto';
 import { Auth } from './decorators/auth.decorator';
 import { AuthType } from './enums/auth-type.enum';
 import { RefreshTokenDto } from './dto/refresh-token.dto/refresh-token.dto';
-import { ApiExcludeEndpoint, ApiResponse } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { SignInResponseDto } from './dto/sign-in-response.dto/sign-in-response.dto';
 import { ApiResponseDto } from 'src/school/dto/api-response.dto';
 import { SignUpResponseDto } from './dto/sign-up-response.dto/sign-up-response.dto';
 import { Role } from 'src/users/entities/role.entity';
 import { ResetPasswordDto } from './dto/reset-password.dto/reset-password.dto';
 import { ForgetPasswordDto } from './dto/forget-password.dto/forget-password.sto';
+import { ValidateTokenDto } from './dto/validateToken.dto/validate-token.dto';
+import { ValidateTokenResponseDto } from './dto/validate-token-response.dto/validate-token.dto';
 
 @Auth(AuthType.None)
 @Controller('authentication')
@@ -39,6 +41,20 @@ export class AuthenticationController {
   ): Promise<ApiResponseDto<SignUpResponseDto>> {
     const user = await this.authenticationService.signUp(signUpDto);
     return new ApiResponseDto(user, 'User created successfully');
+  }
+
+  @ApiResponse({
+    description: 'validate token',
+    status: 200,
+    type: ValidateTokenResponseDto,
+  })
+  @Post('validate-token')
+  async validateToken(
+    @Body() token: ValidateTokenDto,
+  ): Promise<ApiResponseDto<ValidateTokenResponseDto>> {
+    const response = await this.authenticationService.validateToken(token);
+    console.log('response', response);
+    return new ApiResponseDto(response, 'Token validated successfully');
   }
 
   @ApiResponse({

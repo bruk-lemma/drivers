@@ -28,6 +28,8 @@ import * as path from 'path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SchoolFiles } from './entities/school-files.entity';
 import { Repository } from 'typeorm';
+import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from 'src/iam/interfaces/active-user.data.interface';
 @Auth(AuthType.None)
 @Controller('school')
 export class SchoolController {
@@ -60,6 +62,21 @@ export class SchoolController {
     return new ApiResponseDto(schools, 'Schools retrieved successfully');
   }
 
+  @ApiResponse({
+    type: SchoolResponseDto,
+    isArray: true,
+    description: 'Returns List of schools',
+  })
+  @Auth(AuthType.Bearer)
+  @Get('find-schools-by-user')
+  async findSchoolsByUser(
+    @ActiveUser() user: ActiveUserData,
+  ): Promise<ApiResponseDto<SchoolResponseDto[]>> {
+    console.log('user', user.sub);
+    // return;
+    const schools = await this.schoolService.findSchoolByUserId(user.userId);
+    return new ApiResponseDto(schools, 'Schools retrieved successfully');
+  }
   @ApiResponse({
     type: SchoolResponseDto,
     description: 'Returns a school by id',

@@ -1,10 +1,8 @@
 import {
   BadRequestException,
-  Body,
   ConflictException,
   Inject,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -35,6 +33,8 @@ import {
 } from 'src/users/entities/tokens.entity';
 import { ResetPasswordDto } from './dto/reset-password.dto/reset-password.dto';
 import { ForgetPasswordDto } from './dto/forget-password.dto/forget-password.sto';
+import { ValidateTokenDto } from './dto/validateToken.dto/validate-token.dto';
+import { ValidateTokenResponseDto } from './dto/validate-token-response.dto/validate-token.dto';
 // import { Role } from 'src/users/enums/role.enum';
 
 @Injectable()
@@ -164,6 +164,22 @@ export class AuthenticationService {
     }
   }
 
+  async validateToken(
+    token: ValidateTokenDto,
+  ): Promise<ValidateTokenResponseDto> {
+    try {
+      // Verify the token and return the payload if valid
+      const payload = await this.jwtService.verifyAsync(
+        token.token,
+        this.jwtConfiguration,
+      );
+      console.log(payload);
+      return this.mapTokenToDto(payload.email, payload.sub);
+    } catch (error) {
+      throw new UnauthorizedException(`Invalid token' ${error.message}`);
+    }
+  }
+
   async checkPermission(
     userId: number,
     resource: string,
@@ -223,6 +239,16 @@ export class AuthenticationService {
     } catch (error) {
       throw error;
     }
+  }
+
+  private mapTokenToDto(
+    email: string,
+    userId: number,
+  ): ValidateTokenResponseDto {
+    const validateTokenResponseDto = new ValidateTokenResponseDto();
+    validateTokenResponseDto.email = email;
+    validateTokenResponseDto.userId = userId;
+    return validateTokenResponseDto;
   }
 
   private mapEntityToDto(user: Users): SignUpResponseDto {

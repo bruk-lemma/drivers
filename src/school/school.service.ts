@@ -85,6 +85,27 @@ export class SchoolService {
     }
   }
 
+  async findSchoolByUserId(userId: number): Promise<SchoolResponseDto[]> {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const schools = await this.schoolRepository.find({
+        where: { createdBy: { id: userId } },
+        relations: ['files', 'createdBy'],
+      });
+      if (!schools || schools.length === 0) {
+        throw new NotFoundException('School not found');
+      }
+      return schools.map((school) => this.mapEntityToDto(school));
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async update(id: number, updateSchoolDto: UpdateSchoolDto) {
     try {
       const school = await this.schoolRepository.findOne({
