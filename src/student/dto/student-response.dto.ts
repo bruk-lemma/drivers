@@ -36,7 +36,7 @@ export class StudentResponseDto {
   gender: Gender;
 
   @ApiProperty({
-    example: [LicenseType.AUTOMOBILE, LicenseType.MOTORCYCLE],
+    example: [LicenseType.AUTOMOBILE],
     description: 'The license types of the student',
   })
   @Expose()

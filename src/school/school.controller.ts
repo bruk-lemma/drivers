@@ -26,7 +26,7 @@ import { ApiResponseDto } from './dto/api-response.dto';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SchoolFiles } from './entities/school-files.entity';
+import { SchoolFiles, SchoolFilesType } from './entities/school-files.entity';
 import { Repository } from 'typeorm';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interfaces/active-user.data.interface';
@@ -87,7 +87,7 @@ export class SchoolController {
   ): Promise<ApiResponseDto<SchoolResponseDto>> {
     const school = await this.schoolService.findOne(+id);
     return new ApiResponseDto(school, 'School retrieved successfully');
-  }
+  } //bFiF#z6g5XNEk@L
 
   @ApiResponse({
     type: SchoolResponseDto,
@@ -126,6 +126,7 @@ export class SchoolController {
   @Post('upload-school-license/:schoolId')
   async uploadFile(
     @Param('schoolId') schoolId: number,
+    @Body() documentType: SchoolFilesType,
     @UploadedFile() file: Express.Multer.File,
   ) {
     // Validate if the school exists
@@ -136,7 +137,7 @@ export class SchoolController {
 
     const existingLicense = await this.schoolFilesRepository.findOne({
       where: {
-        documentType: 'School-License',
+        documentType: documentType,
         school: { id: school.id }, // Ensure this matches the entity structure
       },
     });
@@ -169,6 +170,7 @@ export class SchoolController {
     const savedFile = await this.schoolService.saveFileData({
       schoolId: schoolId,
       fileName: uniqueFileName,
+      documentType: documentType,
       filePath,
       fileType: file.mimetype.split('/')[1],
       fileSize: (file.size / 1024).toFixed(2) + ' KB', // Convert size to KB

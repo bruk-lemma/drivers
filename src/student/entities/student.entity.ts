@@ -11,6 +11,7 @@ import {
 import { StudentFiles } from './studentFiles.entity';
 import { Application } from 'src/application/entities/application.entity';
 import { School } from 'src/school/entities/school.entity';
+import { Expose } from 'class-transformer';
 
 export enum Gender {
   MALE = 'male',
@@ -23,13 +24,16 @@ export class Student {
   id: number;
 
   @Column()
+  @Expose()
   firstName: string;
 
   @Column()
+  @Expose()
   lastName: string;
 
   @Min(18)
   @Column()
+  @Expose()
   birthDate: string;
 
   @Column({

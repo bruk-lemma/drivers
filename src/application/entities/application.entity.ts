@@ -11,6 +11,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Expose } from 'class-transformer';
+import exp from 'constants';
 
 export enum ApplicationStatus {
   PENDING = 'pending',
@@ -27,9 +29,11 @@ export class Application {
     nullable: false,
     eager: true,
   })
+  @Expose()
   student: Student;
 
   @Column({ unique: true })
+  @Expose()
   applicationNumber: string;
 
   @Column({ type: 'date' })
@@ -40,9 +44,11 @@ export class Application {
     enum: ApplicationStatus,
     default: ApplicationStatus.PENDING,
   })
+  @Expose()
   applicationStatus: ApplicationStatus;
 
   @Column({ type: 'enum', enum: LicenseType })
+  @Expose()
   application_License_Type: LicenseType;
 
   @ManyToMany(() => Users, (user) => user.applications, { cascade: true })
@@ -50,13 +56,16 @@ export class Application {
 
   // New Field: User who submitted the application
   @ManyToOne(() => Users, { nullable: false, eager: true })
+  @Expose()
   submittedBy: Users;
 
   // New Field: User who approved the application
   @ManyToOne(() => Users, { nullable: true, eager: true })
+  @Expose()
   approvedBy: Users;
 
   @CreateDateColumn()
+  @Expose()
   createdAt: Date;
 
   @UpdateDateColumn()
@@ -66,8 +75,10 @@ export class Application {
   deletedAt: Date;
 
   @Column({ default: true })
+  @Expose()
   isActive: boolean;
 
   @Column({ type: 'text', nullable: true })
+  @Expose()
   remarks: string;
 }

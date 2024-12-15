@@ -1,7 +1,8 @@
 import { Expose } from 'class-transformer';
 import { SchoolFiles } from '../entities/school-files.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Users } from 'src/users/entities/user.entity';
+import { Student } from 'src/student/entities/student.entity';
 
 export class SchoolResponseDto {
   //   @ApiProperty({
@@ -32,18 +33,67 @@ export class SchoolResponseDto {
   name: string;
 
   @ApiProperty({
-    description: 'The address of the school',
+    description: 'The tin of the school',
     type: String,
   })
   @Expose()
-  address: string;
+  tin: string;
 
   @ApiProperty({
-    description: 'The phone number of the school',
+    description: 'the business license number of the school',
     type: String,
   })
   @Expose()
-  phone: string;
+  businessLicenseNumber: string;
+
+  @ApiProperty({
+    description: 'the region of the school',
+    type: String,
+  })
+  @Expose()
+  region: string;
+
+  @ApiProperty({
+    description: 'the city of the school',
+    type: String,
+  })
+  @Expose()
+  city: string;
+
+  @ApiProperty({
+    description: 'the kebele of the school',
+    type: String,
+  })
+  @Expose()
+  kebele: string;
+
+  @ApiProperty({
+    description: 'the region of the school',
+    type: String,
+  })
+  @Expose()
+  wereda: string;
+
+  @ApiProperty({
+    description: 'the phone number of the scholl',
+    type: String,
+  })
+  @Expose()
+  phoneNumber: string;
+
+  @ApiProperty({
+    description: 'the name of the manager of the scholl',
+    type: String,
+  })
+  @Expose()
+  managerName: string;
+
+  @ApiProperty({
+    description: 'the phone number  of the manager of the scholl',
+    type: String,
+  })
+  @Expose()
+  managerPhoneNumber: string;
 
   @ApiProperty({
     description: 'The email of the school',
@@ -58,6 +108,13 @@ export class SchoolResponseDto {
   //   isDeleted: boolean;
   @Expose()
   files: SchoolFiles[];
+
+  @ApiProperty({
+    description: 'The students of the school',
+    type: Student,
+  })
+  @Expose()
+  students: Student[];
 
   @ApiProperty({
     description: 'The user that created the school',

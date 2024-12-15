@@ -9,10 +9,19 @@ import {
 } from 'typeorm';
 
 export enum LicenseType {
-  AUTOMOBILE = 'auto',
-  MOTORCYCLE = 'moto',
-  TRUCK = 'truck',
-  BUS = 'bus',
+  // AUTOMOBILE = 'auto',
+
+  Two_legged_vehicle = 'ባለ-ሁለት-እግር-ተሽከርካሪ',
+  Three_legged_vehicle = 'ባለ-ሦስት-እግር-ተሽከርካሪ',
+  AUTOMOBILE = 'አውቶሞቢል',
+  People_1 = 'ህዝብ-1',
+  People_2 = 'ህዝብ-2',
+  People_3 = 'ህዝብ-3',
+  Dry_Cargo_1 = 'ደረቅ-1',
+  Dry_Cargo_2 = 'ደረቅ-2',
+  Dry_Cargo_3 = 'ደረቅ-3',
+  Liqiuide_Cargo_1 = 'ፈሳሽ-1',
+  Liqiuide_Cargo_2 = 'ፈሳሽ-2',
 }
 
 @Entity()

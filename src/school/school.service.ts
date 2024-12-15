@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { School } from './entities/school.entity';
 import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { SchoolFiles } from './entities/school-files.entity';
+import { SchoolFiles, SchoolFilesType } from './entities/school-files.entity';
 import { SchoolResponseDto } from './dto/school-response.dto';
 import { Users } from 'src/users/entities/user.entity';
 
@@ -43,8 +43,19 @@ export class SchoolService {
       const school = new School();
       school.name = createSchoolDto.name;
       school.uniqueSchoolId = uniqueSchoolId;
-      school.address = createSchoolDto.address;
-      school.phone = createSchoolDto.phone;
+      school.tin = createSchoolDto.tin;
+      school.businessLicenseNumber = createSchoolDto.businessLicenseNumber;
+      school.region = createSchoolDto.region;
+      school.city = createSchoolDto.city;
+      school.kebele = createSchoolDto.kebele;
+      school.wereda = createSchoolDto.wereda;
+      school.houseNumber = createSchoolDto.houseNumber;
+
+      //school.address = createSchoolDto.address;
+      school.phoneNumber = createSchoolDto.phoneNumber;
+      school.managerName = createSchoolDto.managerName;
+      school.managerPhoneNumber = createSchoolDto.managerPhoneNumber;
+
       school.email = createSchoolDto.email;
       school.createdBy = user;
       school.createdAt = new Date();
@@ -58,7 +69,7 @@ export class SchoolService {
   async findAll(): Promise<SchoolResponseDto[]> {
     try {
       const schools: School[] = await this.schoolRepository.find({
-        relations: ['files', 'createdBy'],
+        relations: ['files', 'createdBy', 'students'],
       });
       if (schools.length === 0 || !schools) {
         throw new NotFoundException('No schools found');
@@ -114,10 +125,10 @@ export class SchoolService {
       if (!school) {
         throw new NotFoundException('School not found');
       }
-      school.name = updateSchoolDto.name;
-      school.address = updateSchoolDto.address;
-      school.phone = updateSchoolDto.phone;
-      school.email = updateSchoolDto.email;
+      await this.schoolRepository.update(id, {
+        ...updateSchoolDto,
+        createdBy: { id: updateSchoolDto.createdBy },
+      });
       school.updatedAt = new Date();
       await this.schoolRepository.save(school);
       return school;
@@ -151,6 +162,7 @@ export class SchoolService {
     filePath: string;
     fileType: string;
     fileSize: string;
+    documentType: SchoolFilesType;
   }): Promise<SchoolFiles> {
     try {
       const school = await this.schoolRepository.findOne({
@@ -166,7 +178,7 @@ export class SchoolService {
         filePath: fileData.filePath,
         fileType: fileData.fileType,
         fileSize: fileData.fileSize,
-        documentType: 'School-License',
+        documentType: fileData.documentType,
         createdAt: new Date(),
       });
       return await this.schoolFilesRepository.save(newFile);
@@ -180,11 +192,20 @@ export class SchoolService {
     schoolResponseDto.id = entity.id;
     schoolResponseDto.uniqueSchoolId = entity.uniqueSchoolId;
     schoolResponseDto.name = entity.name;
-    schoolResponseDto.address = entity.address;
-    schoolResponseDto.phone = entity.phone;
+    schoolResponseDto.tin = entity.tin;
+    schoolResponseDto.businessLicenseNumber = entity.businessLicenseNumber;
+    schoolResponseDto.region = entity.region;
+    schoolResponseDto.city = entity.city;
+    schoolResponseDto.kebele = entity.kebele;
+    schoolResponseDto.wereda = entity.wereda;
+    schoolResponseDto.phoneNumber = entity.phoneNumber;
+    schoolResponseDto.managerName = entity.managerName;
+    schoolResponseDto.managerPhoneNumber = entity.managerPhoneNumber;
     schoolResponseDto.email = entity.email;
     schoolResponseDto.files = entity.files;
+    schoolResponseDto.students = entity.students;
     schoolResponseDto.createdBy = entity.createdBy;
+
     return schoolResponseDto;
   }
 

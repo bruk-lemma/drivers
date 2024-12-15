@@ -22,10 +22,34 @@ export class School {
   name: string;
 
   @Column()
-  address: string;
+  tin: string;
 
   @Column()
-  phone: string;
+  businessLicenseNumber: string;
+
+  @Column()
+  region: string;
+
+  @Column()
+  city: string;
+
+  @Column({ nullable: true })
+  kebele: string;
+
+  @Column({ nullable: true })
+  wereda: string;
+
+  @Column()
+  houseNumber: string;
+
+  @Column()
+  phoneNumber: string;
+
+  @Column()
+  managerName: string;
+
+  @Column()
+  managerPhoneNumber: string;
 
   @Column()
   email: string;

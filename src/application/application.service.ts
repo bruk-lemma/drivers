@@ -23,19 +23,27 @@ export class ApplicationService {
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
   ) {}
-  async create(createApplicationDto: CreateApplicationDto) {
+  async create(userid: number, createApplicationDto: CreateApplicationDto) {
     try {
+      const user = await this.usersRepository.findOne({
+        where: {
+          id: userid,
+        },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
       const student = await this.studentRepository.findOne({
         where: {
           id: createApplicationDto.studentId,
         },
       });
 
-      const submittedBy = await this.usersRepository.findOne({
-        where: {
-          id: createApplicationDto.submittedBy,
-        },
-      });
+      // const submittedBy = await this.usersRepository.findOne({
+      //   where: {
+      //     id: createApplicationDto.submittedBy,
+      //   },
+      // });
       if (!student) {
         throw new NotFoundException('Student not found');
       }
@@ -51,13 +59,13 @@ export class ApplicationService {
         throw new ConflictException('Application already exists');
       }
 
-      if (!submittedBy) {
-        throw new NotFoundException('User not found');
-      }
+      // if (!submittedBy) {
+      //   throw new NotFoundException('User not found');
+      // }
       const application = this.applicationRepository.create({
         ...createApplicationDto,
         student,
-        submittedBy,
+        submittedBy: user,
       });
       application.applicationNumber = randomUUID();
       application.createdAt = new Date();
@@ -70,7 +78,9 @@ export class ApplicationService {
 
   async findAll() {
     try {
-      const applications = await this.applicationRepository.find();
+      const applications = await this.applicationRepository.find({
+        relations: ['student', 'submittedBy', 'approvedBy'],
+      });
       if (applications.length === 0) {
         throw new NotFoundException('No applications found');
       }
@@ -97,7 +107,11 @@ export class ApplicationService {
     }
   }
 
-  async update(id: number, updateApplicationDto: UpdateApplicationDto) {
+  async update(
+    id: number,
+    userid: number,
+    updateApplicationDto: UpdateApplicationDto,
+  ) {
     try {
       const application = await this.applicationRepository.findOne({
         where: {
@@ -110,7 +124,7 @@ export class ApplicationService {
 
       const submittedBy = await this.applicationRepository.findOne({
         where: {
-          id: updateApplicationDto.submittedBy,
+          id: userid,
         },
       });
       if (!submittedBy) {

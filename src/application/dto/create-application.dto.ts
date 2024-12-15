@@ -33,13 +33,13 @@ export class CreateApplicationDto {
   })
   application_License_Type: LicenseType;
 
-  @ApiProperty({
-    description: 'Submitted By',
-    example: 1,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  submittedBy: number;
+  // @ApiProperty({
+  //   description: 'Submitted By',
+  //   example: 1,
+  // })
+  // @IsNotEmpty()
+  // @IsNumber()
+  // submittedBy: number;
 
   // @ApiProperty({
   //   description: 'Approved By',
