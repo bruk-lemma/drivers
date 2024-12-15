@@ -30,6 +30,7 @@ import { SchoolFiles, SchoolFilesType } from './entities/school-files.entity';
 import { Repository } from 'typeorm';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interfaces/active-user.data.interface';
+import { UploadDocDto } from './dto/upload-doc.dto';
 @Auth(AuthType.None)
 @Controller('school')
 export class SchoolController {
@@ -104,7 +105,7 @@ export class SchoolController {
   }
 
   @UseInterceptors(
-    FileInterceptor('license', {
+    FileInterceptor('document', {
       storage: memoryStorage(), // Store files in memory instead of disk
       limits: {
         fileSize: 1 * 1024 * 1024, // 1 MB limit
@@ -123,27 +124,26 @@ export class SchoolController {
       },
     }),
   )
-  @Post('upload-school-license/:schoolId')
+  @Post('upload-school-document')
   async uploadFile(
-    @Param('schoolId') schoolId: number,
-    @Body() documentType: SchoolFilesType,
+    @Body() uploadDocDto: UploadDocDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
     // Validate if the school exists
-    const school = await this.schoolService.findOne(schoolId);
+    const school = await this.schoolService.findOne(uploadDocDto.schoolId);
     if (!school) {
       throw new NotFoundException('School not found');
     }
 
     const existingLicense = await this.schoolFilesRepository.findOne({
       where: {
-        documentType: documentType,
+        documentType: uploadDocDto.documentType,
         school: { id: school.id }, // Ensure this matches the entity structure
       },
     });
     if (existingLicense) {
       throw new ConflictException(
-        `License file already exists: ${existingLicense.fileName}`,
+        `License file already exists: ${existingLicense.fileName} for ${school.name}`,
       );
     }
 
@@ -154,7 +154,7 @@ export class SchoolController {
     }
 
     // Define the file path
-    const uploadDir = './uploads/school_license';
+    const uploadDir = `uploads/school/${uploadDocDto.documentType}`;
     const uniqueFileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${
       file.originalname
     }`;
@@ -168,9 +168,9 @@ export class SchoolController {
 
     // Save file metadata to database
     const savedFile = await this.schoolService.saveFileData({
-      schoolId: schoolId,
+      schoolId: uploadDocDto.schoolId,
       fileName: uniqueFileName,
-      documentType: documentType,
+      documentType: uploadDocDto.documentType,
       filePath,
       fileType: file.mimetype.split('/')[1],
       fileSize: (file.size / 1024).toFixed(2) + ' KB', // Convert size to KB
