@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { LoggerMiddleware } from './logger.middleware';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SeedService } from './seed.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,7 +29,9 @@ async function bootstrap() {
       strategy: 'excludeAll',
     }),
   );
-
+  // Run Seeding Logic
+  const seedService = app.get(SeedService); // Get the SeedService
+  await seedService.seed(); // Run the seeding logic
   await app.listen(3000);
 }
 bootstrap();

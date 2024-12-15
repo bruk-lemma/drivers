@@ -2,6 +2,12 @@ import { Expose } from 'class-transformer';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Users } from './user.entity';
 
+export enum RoleEnum {
+  Default = 'default',
+  schoolAdmin = 'schoolAdmin',
+  superAdmin = 'superAdmin',
+}
+
 @Entity()
 export class Role {
   @PrimaryGeneratedColumn()
@@ -10,7 +16,7 @@ export class Role {
 
   @Column({ unique: true })
   @Expose()
-  name: string;
+  name: RoleEnum;
 
   @OneToMany(() => Users, (user) => user.role)
   users: Users[];

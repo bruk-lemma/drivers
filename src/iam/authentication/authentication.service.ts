@@ -384,4 +384,13 @@ export class AuthenticationService {
       throw error;
     }
   }
+
+  async fetchRoles(): Promise<Role[]> {
+    try {
+      const roles = await this.roleRepository.find();
+      return roles;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

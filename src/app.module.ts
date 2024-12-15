@@ -14,6 +14,8 @@ import { join } from 'path';
 import { ApplicationModule } from './application/application.module';
 import { ExaminationModule } from './examination/examination.module';
 import { ensureDatabaseExists } from './create-db';
+import { SeedService } from './seed.service';
+import { SeedModule } from './seed.module';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { ensureDatabaseExists } from './create-db';
     CoffeesModule,
     UsersModule,
     IamModule,
+    SeedModule, //
     TypeOrmModule.forRootAsync({
       // inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
