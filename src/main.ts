@@ -4,6 +4,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { LoggerMiddleware } from './logger.middleware';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SeedService } from './seed.service';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,6 +33,8 @@ async function bootstrap() {
   // Run Seeding Logic
   const seedService = app.get(SeedService); // Get the SeedService
   await seedService.seed(); // Run the seeding logic
+  app.use(bodyParser.json({ limit: '10mb' })); // Set to your desired limit
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   await app.listen(3000);
 }
 bootstrap();

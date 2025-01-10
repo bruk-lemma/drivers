@@ -12,6 +12,7 @@ import { StudentFiles } from './studentFiles.entity';
 import { Application } from 'src/application/entities/application.entity';
 import { School } from 'src/school/entities/school.entity';
 import { Expose } from 'class-transformer';
+import { Examination } from 'src/examination/entities/examination.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -75,4 +76,8 @@ export class Student {
     nullable: false,
   })
   createdAt: Date;
+
+  //one to many withj examination
+  @OneToMany(() => Examination, (examination) => examination.student)
+  examinations: Examination[];
 }

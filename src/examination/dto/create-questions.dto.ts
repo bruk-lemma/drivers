@@ -1,4 +1,4 @@
-export class CreateExaminationDto {
+export class CreateQuestionsDto {
   // Add the following properties:
   description: string;
   choice1: string;
