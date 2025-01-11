@@ -57,7 +57,7 @@ export class ExaminationController {
     return this.examinationService.findAll();
   }
 
-  @Get(':id')
+  @Get('/question/:id')
   findOne(@Param('id') id: string) {
     return this.examinationService.findOne(+id);
   }

@@ -68,8 +68,18 @@ export class ExaminationService {
     return `This action returns all examination`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} examination`;
+  async findOne(id: number) {
+    try {
+      const question = await this.questionsRepository.findOne({
+        where: { id: id },
+      });
+      if (!question) {
+        throw new BadRequestException(`Question with ID "${id}" not found.`);
+      }
+      return this.mapEntityToDto(question);
+    } catch (e) {
+      throw e;
+    }
   }
 
   update(id: number, updateExaminationDto: UpdateExaminationDto) {
@@ -263,4 +273,23 @@ export class StudentRecordResponseDto {
     this.student = student;
     this.examination = examination;
   }
+}
+export class QuestionResponseDto {
+  @Expose()
+  id: number;
+
+  @Expose()
+  description: string;
+
+  @Expose()
+  choice1: string;
+
+  @Expose()
+  choice2: string;
+
+  @Expose()
+  choice3: string;
+
+  @Expose()
+  choice4: string;
 }

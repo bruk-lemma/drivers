@@ -8,11 +8,17 @@ import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // app.enableCors({
+  //   origin: '*', // Accept requests from all domains
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  //   credentials: true,
+  // });
   app.enableCors({
-    origin: '*', // Accept requests from all domains
+    origin: 'http://localhost:5173', // Replace with your client URL
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
+    credentials: true, // Allow cookies/credentials
   });
+
   app.use(new LoggerMiddleware().use);
   const config = new DocumentBuilder()
     .setTitle('Genesis API')
