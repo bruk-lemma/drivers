@@ -132,7 +132,7 @@ export class ExaminationService {
       const questions = await this.questionsRepository
         .createQueryBuilder()
         .orderBy('RANDOM()') // Use RAND() for MySQL
-        .limit(10)
+        .limit(100)
         .getMany();
 
       console.log('Fetched questions:', questions);
@@ -147,10 +147,11 @@ export class ExaminationService {
 
       return questions.map((question) => this.mapEntityToDto(question));
     } catch (error) {
-      console.error('Error fetching random questions:', error);
-      throw new Error(
-        'Unable to fetch random questions at this time. Please try again later.',
-      );
+      throw error;
+      // console.error('Error fetching random questions:', error);
+      // throw new Error(
+      //   'Unable to fetch random questions at this time. Please try again later.',
+      // );
     }
   }
 
@@ -226,7 +227,7 @@ export class ExaminationService {
     questionResponseDto.choice2 = question.choice2;
     questionResponseDto.choice3 = question.choice3;
     questionResponseDto.choice4 = question.choice4;
-    questionResponseDto.answer = question.answer;
+    // questionResponseDto.answer = question.answer;
     return questionResponseDto;
   }
 }
