@@ -78,13 +78,13 @@ export class ExaminationService {
       }
       //if question has non empty image, return the image from Alarms folder
 
-      if (
-        question.image !== null &&
-        question.image !== undefined &&
-        question.image !== ''
-      ) {
-        question.image = `http://localhost:3000/alarms/${question.image}`;
-      }
+      // if (
+      //   question.image !== null &&
+      //   question.image !== undefined &&
+      //   question.image !== ''
+      // ) {
+      //   question.image = `http://localhost:3000/alarms/${question.image}`;
+      // }
 
       return this.mapEntityToDto(question);
     } catch (e) {
