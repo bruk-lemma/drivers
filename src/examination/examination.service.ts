@@ -131,7 +131,21 @@ export class ExaminationService {
         question.choice3 = createQuestionDto.choice3;
         question.choice4 = createQuestionDto.choice4;
         question.answer = createQuestionDto.answer;
-        question.image = createQuestionDto.image;
+        if (
+          createQuestionDto.image !== null &&
+          createQuestionDto.image !== undefined &&
+          createQuestionDto.image !== ''
+        ) {
+          question.image = `http://195.35.28.172:3001/alarms/${createQuestionDto.image}`;
+        }
+
+        if (
+          createQuestionDto.image === null ||
+          createQuestionDto.image === undefined ||
+          createQuestionDto.image === ''
+        ) {
+          question.image = '';
+        }
 
         // Save the question to the database
         const savedQuestion = await this.questionsRepository.save(question);
