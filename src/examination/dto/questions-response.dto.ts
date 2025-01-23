@@ -51,4 +51,11 @@ export class QuestionsResponseDto {
   })
   @Expose()
   answer: string;
+
+  @ApiProperty({
+    description: 'The image of the question',
+    type: String,
+  })
+  @Expose()
+  image: string;
 }

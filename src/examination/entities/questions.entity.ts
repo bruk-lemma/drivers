@@ -26,6 +26,11 @@ export class Question {
   @Column()
   answer: string;
 
+  @Column({
+    nullable: true,
+  })
+  image: string;
+
   //   @ManyToOne(() => Examination, (examination) => examination.questions)
   //   examination: Examination;
 }

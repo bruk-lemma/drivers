@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateQuestionsDto } from './dto/create-questions.dto';
 import { QuestionsResponseDto } from './dto/questions-response.dto';
 import { CalculateDto } from './dto/calculate-dto';
-import { Expose, plainToInstance } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { CreateStudentRecordDto } from './dto/create-student-record.dto';
 import { Examination } from './entities/examination.entity';
 import { Student } from 'src/student/entities/student.entity';
@@ -76,6 +76,16 @@ export class ExaminationService {
       if (!question) {
         throw new BadRequestException(`Question with ID "${id}" not found.`);
       }
+      //if question has non empty image, return the image from Alarms folder
+
+      if (
+        question.image !== null &&
+        question.image !== undefined &&
+        question.image !== ''
+      ) {
+        question.image = `http://localhost:3000/alarms/${question.image}`;
+      }
+
       return this.mapEntityToDto(question);
     } catch (e) {
       throw e;
@@ -103,6 +113,7 @@ export class ExaminationService {
             choice3: createQuestionDto.choice3,
             choice4: createQuestionDto.choice4,
             answer: createQuestionDto.answer,
+            image: createQuestionDto.image,
           },
         });
 
@@ -120,6 +131,7 @@ export class ExaminationService {
         question.choice3 = createQuestionDto.choice3;
         question.choice4 = createQuestionDto.choice4;
         question.answer = createQuestionDto.answer;
+        question.image = createQuestionDto.image;
 
         // Save the question to the database
         const savedQuestion = await this.questionsRepository.save(question);
@@ -180,7 +192,7 @@ export class ExaminationService {
           );
         }
         console.log('first question', question);
-        if (question.answer === dto.answer) {
+        if (`choice${question.answer}` === dto.answer) {
           score++;
         }
       }
@@ -237,6 +249,7 @@ export class ExaminationService {
     questionResponseDto.choice2 = question.choice2;
     questionResponseDto.choice3 = question.choice3;
     questionResponseDto.choice4 = question.choice4;
+    questionResponseDto.image = question.image;
     // questionResponseDto.answer = question.answer;
     return questionResponseDto;
   }
@@ -292,4 +305,7 @@ export class QuestionResponseDto {
 
   @Expose()
   choice4: string;
+
+  @Expose()
+  image: string;
 }

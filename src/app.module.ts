@@ -44,10 +44,16 @@ import { SeedModule } from './seed.module';
         return connectionOptions;
       },
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads', // This will make files available at http://localhost:3000/uploads
-    }),
+    ServeStaticModule.forRoot(
+      {
+        rootPath: join(__dirname, '..', 'uploads'),
+        serveRoot: '/uploads', // This will make files available at http://localhost:3000/uploads
+      },
+      {
+        rootPath: join(__dirname, '..', 'Alarms'),
+        serveRoot: '/Alarms', // This will make files available at http://localhost:3000/uploads
+      },
+    ),
     SchoolModule,
     StudentModule,
     LicenseModule,

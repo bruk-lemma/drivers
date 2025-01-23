@@ -6,4 +6,5 @@ export class CreateQuestionsDto {
   choice3: string;
   choice4: string;
   answer: string;
+  image: string;
 }
