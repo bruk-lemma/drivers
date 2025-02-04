@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { ExaminationService } from './examination.service';
 import { CreateExaminationDto } from './dto/create-examination.dto';
@@ -35,6 +36,23 @@ export class ExaminationController {
   @Get('/get-random-questions')
   async getRandomQuestions(): Promise<any> {
     return await this.examinationService.fetchRandomQuestions();
+  }
+
+  @Get('/get-questions/:amount')
+  async getQuestions(@Param('amount') amount: string): Promise<any> {
+    const numericAmount = parseInt(amount, 10);
+    if (isNaN(numericAmount)) {
+      throw new BadRequestException('Amount must be a valid number.');
+    }
+    if (numericAmount > 100) {
+      throw new BadRequestException('Amount must be less than 100.');
+    }
+    if (numericAmount < 1) {
+      throw new BadRequestException('Amount must be greater than 0.');
+    }
+    return await this.examinationService.fetchRandomQuestionsByNumber(
+      numericAmount,
+    );
   }
 
   @Post('/calculate')

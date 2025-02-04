@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateExaminationDto } from './dto/create-examination.dto';
 import { UpdateExaminationDto } from './dto/update-examination.dto';
 import { Question } from './entities/questions.entity';
@@ -188,6 +192,34 @@ export class ExaminationService {
       // throw new Error(
       //   'Unable to fetch random questions at this time. Please try again later.',
       // );
+    }
+  }
+
+  async fetchRandomQuestionsByNumber(
+    amount: number,
+  ): Promise<QuestionsResponseDto[]> {
+    try {
+      if (!Number.isInteger(amount) || amount <= 0) {
+        throw new BadRequestException('Amount must be a positive integer.');
+      }
+
+      const questions = await this.questionsRepository
+        .createQueryBuilder('question')
+        .orderBy('RANDOM()') // Ensure compatibility with your DB
+        .limit(amount)
+        .getMany();
+
+      if (questions.length === 0) {
+        throw new BadRequestException(
+          'No questions available. Please add some.',
+        );
+      }
+
+      return questions.map((q) => this.mapEntityToDto(q));
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Unable to fetch random questions. Please try again later.',
+      );
     }
   }
 
